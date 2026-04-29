@@ -1,265 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Shot Lab — Lacrosse Shooting Form Analyzer</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
-<style>
-:root{--bg:#f5f2eb;--surface:#ffffff;--surface2:#f0ece2;--ink:#1a1714;--ink-muted:#7a7268;--ink-faint:#b8b0a4;--accent:#d4401a;--accent-dim:rgba(212,64,26,0.08);--accent-border:rgba(212,64,26,0.2);--green:#2a7a4b;--green-dim:rgba(42,122,75,0.08);--amber:#c47f17;--amber-dim:rgba(196,127,23,0.1);--border:rgba(26,23,20,0.1);--border-strong:rgba(26,23,20,0.18);--radius:2px}
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.6;min-height:100vh}
-body::after{content:'';position:fixed;inset:0;background-image:repeating-linear-gradient(transparent,transparent 27px,rgba(26,23,20,0.04) 27px,rgba(26,23,20,0.04) 28px);pointer-events:none;z-index:0}
-.app{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:1.5rem 1rem 5rem}
-.header{margin-bottom:2rem}
-.header-top{display:flex;align-items:center;gap:10px;margin-bottom:0.25rem}
-.lab-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;background:var(--accent);color:white;font-family:'DM Mono',monospace;font-size:10px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;border-radius:1px}
-.header h1{font-family:'Syne',sans-serif;font-size:38px;font-weight:800;color:var(--ink);line-height:1;letter-spacing:-0.02em}
-.header h1 span{color:var(--accent)}
-.header-sub{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink-muted);margin-top:5px}
-.divider{border:none;border-top:1.5px solid var(--ink);margin:0.875rem 0 1.5rem}
-.section{margin-bottom:1.125rem}
-.section-head{display:flex;align-items:center;gap:10px;margin-bottom:0.625rem}
-.section-num{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;color:var(--accent);min-width:20px}
-.section-label{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink)}
-.section-line{flex:1;height:1px;background:var(--border-strong)}
-.card{background:var(--surface);border:1px solid var(--border-strong);border-radius:var(--radius);padding:1.125rem 1.25rem}
-.field{margin-bottom:0.75rem}
-.field:last-child{margin-bottom:0}
-.field label{display:block;font-family:'DM Mono',monospace;font-size:11px;color:var(--ink-muted);margin-bottom:4px;letter-spacing:0.05em;text-transform:uppercase}
-.field input,.field select,.field textarea{width:100%;background:var(--surface2);border:1px solid var(--border-strong);border-radius:var(--radius);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:14px;padding:9px 12px;outline:none;transition:border-color 0.15s;-webkit-appearance:none}
-.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);background:#fff}
-.field input::placeholder,.field textarea::placeholder{color:var(--ink-faint)}
-.field select option{background:#fff}
-.field textarea{resize:vertical;min-height:60px;line-height:1.5}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0.625rem}
-.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.625rem}
-.key-note{margin-top:6px;font-family:'DM Mono',monospace;font-size:11px;color:var(--ink-muted);line-height:1.6;padding:6px 10px;border-left:2px solid var(--accent);background:var(--accent-dim)}
-.upload-zone{border:1.5px dashed var(--border-strong);border-radius:var(--radius);padding:1.5rem;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--surface2)}
-.upload-zone:hover,.upload-zone.active{border-color:var(--accent);background:var(--accent-dim)}
-.upload-icon{width:48px;height:48px;margin:0 auto 0.875rem;background:var(--surface);border:1px solid var(--border-strong);border-radius:50%;display:flex;align-items:center;justify-content:center}
-.upload-zone h3{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--ink);margin-bottom:3px}
-.upload-zone p{font-size:12px;color:var(--ink-muted);font-family:'DM Mono',monospace}
-.file-chosen{display:none;margin-top:0.875rem;padding:7px 12px;background:var(--green-dim);border:1px solid rgba(42,122,75,0.25);border-radius:var(--radius);font-family:'DM Mono',monospace;font-size:11px;color:var(--green)}
-.analyze-btn{width:100%;padding:14px;background:var(--ink);color:#f5f2eb;border:none;border-radius:var(--radius);font-family:'Syne',sans-serif;font-size:16px;font-weight:800;letter-spacing:0.04em;text-transform:uppercase;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:10px;margin-top:1.125rem;-webkit-tap-highlight-color:transparent}
-.analyze-btn:active{transform:scale(0.98)}
-.analyze-btn:disabled{background:var(--border-strong);color:var(--ink-faint);cursor:not-allowed;transform:none}
-.error-msg{display:none;padding:10px 14px;background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:var(--radius);color:var(--accent);font-size:13px;margin-top:0.75rem;font-family:'DM Mono',monospace;line-height:1.5}
-#progressSection{display:none}
-.progress-wrap{background:var(--surface);border:1.5px solid var(--ink);border-radius:var(--radius);padding:2rem 1.5rem;text-align:center}
-.scanning-icon{width:40px;height:40px;margin:0 auto 1.25rem}
-.pulse{animation:pulse 1.5s ease-in-out infinite}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.92)}}
-.progress-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--ink);margin-bottom:5px}
-.progress-sub{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink-muted);margin-bottom:1.5rem;line-height:1.6}
-.progress-track{background:var(--surface2);border:1px solid var(--border-strong);border-radius:2px;height:8px;overflow:hidden;margin-bottom:7px}
-.progress-fill{height:100%;background:var(--accent);border-radius:2px;width:0%;transition:width 0.5s cubic-bezier(0.4,0,0.2,1)}
-.progress-pct{font-family:'DM Mono',monospace;font-size:12px;color:var(--ink-muted)}
-#reportSection{display:none}
-.report-banner{background:var(--ink);color:#f5f2eb;border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.875rem}
-.report-title-block h2{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;line-height:1;margin-bottom:3px}
-.report-title-block p{font-family:'DM Mono',monospace;font-size:10px;color:rgba(245,242,235,0.4);letter-spacing:0.06em;text-transform:uppercase}
-.score-cluster{display:flex;gap:0.875rem;align-items:center}
-.score-box{text-align:center}
-.score-num{font-family:'Syne',sans-serif;font-size:30px;font-weight:800;color:var(--accent);line-height:1}
-.score-label{font-family:'DM Mono',monospace;font-size:9px;color:rgba(245,242,235,0.35);letter-spacing:0.08em;text-transform:uppercase;margin-top:2px}
-.score-divider{width:1px;height:36px;background:rgba(245,242,235,0.1)}
-.reset-btn{padding:7px 14px;background:transparent;border:1px solid rgba(245,242,235,0.18);border-radius:var(--radius);color:rgba(245,242,235,0.5);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.scorecard{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:7px;margin-bottom:1rem}
-.score-card{background:var(--surface);border:1px solid var(--border-strong);border-radius:var(--radius);padding:0.75rem 0.875rem}
-.score-card-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--ink-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:5px}
-.score-card-val{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--ink);line-height:1;margin-bottom:4px}
-.score-bar{height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;margin-top:5px}
-.score-bar-fill{height:100%;border-radius:2px;transition:width 0.8s ease}
-.score-good{background:var(--green)}.score-mid{background:var(--amber)}.score-low{background:var(--accent)}
-.findings-list{display:flex;flex-direction:column;gap:7px}
-.finding{border-left:3px solid transparent;padding:9px 12px;background:var(--surface2);border-radius:0 var(--radius) var(--radius) 0}
-.finding.strength{border-left-color:var(--green)}.finding.weakness{border-left-color:var(--accent)}.finding.note{border-left-color:var(--amber)}
-.finding-type{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:2px}
-.finding.strength .finding-type{color:var(--green)}.finding.weakness .finding-type{color:var(--accent)}.finding.note .finding-type{color:var(--amber)}
-.finding-text{font-size:13px;color:var(--ink);line-height:1.5}
-.report-text{font-size:14px;line-height:1.85;color:var(--ink);white-space:pre-wrap}
-.drill-list{display:flex;flex-direction:column;gap:9px}
-.drill-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:0.875rem 1rem;display:flex;gap:12px}
-.drill-num{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:var(--accent);line-height:1;min-width:26px;opacity:0.25}
-.drill-name{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--ink);margin-bottom:3px}
-.drill-desc{font-size:13px;color:var(--ink-muted);line-height:1.55}
-.drill-target{display:inline-block;margin-top:5px;font-family:'DM Mono',monospace;font-size:10px;padding:2px 8px;background:var(--accent-dim);border:1px solid var(--accent-border);color:var(--accent);border-radius:1px;letter-spacing:0.04em;text-transform:uppercase}
-.priority-card{background:var(--ink);border:1px solid var(--ink);border-radius:var(--radius);padding:1.125rem 1.25rem}
-.priority-label{font-family:'DM Mono',monospace;font-size:10px;color:rgba(245,242,235,0.35);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.625rem}
-.priority-text{font-size:14px;line-height:1.75;color:#f5f2eb}
-@media(max-width:480px){.header h1{font-size:30px}.grid2,.grid3{grid-template-columns:1fr}.score-cluster{gap:0.625rem}.score-num{font-size:24px}}
-</style>
-</head>
-<body>
-<div class="app">
-  <div class="header">
-    <div class="header-top">
-      <div class="lab-badge">
-        <svg width="7" height="7" viewBox="0 0 8 8" fill="white"><circle cx="4" cy="4" r="4"/></svg>
-        AI Analysis
-      </div>
-    </div>
-    <h1>Shot<span>Lab</span></h1>
-    <div class="header-sub">// shooting form analyzer · works on iPhone · powered by gemini</div>
-  </div>
-  <hr class="divider">
-
-  <div id="setupSection">
-    <div class="section">
-      <div class="section-head"><div class="section-num">01</div><div class="section-label">Gemini API Key</div><div class="section-line"></div></div>
-      <div class="card">
-        <div class="field">
-          <label>API key — get one free at aistudio.google.com</label>
-          <input type="password" id="apiKey" placeholder="AIza…" autocomplete="off" autocorrect="off" autocapitalize="off">
-          <div class="key-note">// stays in your browser · sent only directly to google's api</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-head"><div class="section-num">02</div><div class="section-label">Player Info</div><div class="section-line"></div></div>
-      <div class="card">
-        <div class="grid3" style="margin-bottom:0.75rem">
-          <div class="field" style="margin-bottom:0">
-            <label>Name (optional)</label>
-            <input type="text" id="playerName" placeholder="Jake Miller" autocorrect="off">
-          </div>
-          <div class="field" style="margin-bottom:0">
-            <label>Dominant hand</label>
-            <select id="dominantHand">
-              <option value="">Select…</option>
-              <option>Right-handed</option>
-              <option>Left-handed</option>
-            </select>
-          </div>
-          <div class="field" style="margin-bottom:0">
-            <label>Level</label>
-            <select id="level">
-              <option value="">Select…</option>
-              <option>Youth</option>
-              <option>High school</option>
-              <option>College</option>
-              <option>Club / post-grad</option>
-            </select>
-          </div>
-        </div>
-        <div class="grid2" style="margin-bottom:0.75rem">
-          <div class="field" style="margin-bottom:0">
-            <label>Shot type</label>
-            <select id="shotType">
-              <option value="">Select…</option>
-              <option>Overhand</option>
-              <option>Sidearm</option>
-              <option>Underhand</option>
-              <option>Mixed / multiple</option>
-            </select>
-          </div>
-          <div class="field" style="margin-bottom:0">
-            <label>Camera angle</label>
-            <select id="cameraAngle">
-              <option value="">Select…</option>
-              <option>Behind shooter</option>
-              <option>Side view</option>
-              <option>Front (from cage)</option>
-              <option>Mixed angles</option>
-            </select>
-          </div>
-        </div>
-        <div class="field">
-          <label>Specific concerns (optional)</label>
-          <textarea id="concerns" placeholder="e.g. elbow drops on release, losing accuracy when shooting on the run…"></textarea>
-        </div>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-head"><div class="section-num">03</div><div class="section-label">Shooting Video</div><div class="section-line"></div></div>
-      <div class="card" style="padding:1rem">
-        <div class="upload-zone">
-          <div class="upload-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M15 10l-4 4-4-4M11 14V3"/>
-              <rect x="3" y="15" width="16" height="6" rx="1"/>
-            </svg>
-          </div>
-          <h3>Select your video</h3>
-          <p>mp4 · mov · any file size · slow-mo works great</p>
-          <div class="file-chosen" id="fileChosen"></div>
-          <input type="file" id="fileInput" accept="video/*" onchange="handleFile(this)"
-            style="margin-top:0.875rem;width:100%;font-size:13px;color:#1a1714;background:#ffffff;border:1px solid #1a1714;border-radius:2px;padding:8px;cursor:pointer;display:block">
-        </div>
-        <div style="margin-top:0.75rem;font-family:'DM Mono',monospace;font-size:11px;color:var(--ink-muted);line-height:1.7">TIP // Side view or behind-shooter. iPhone slow-mo (240fps) gives Gemini the most to work with at the release point.</div>
-      </div>
-    </div>
-
-    <div class="error-msg" id="errorMsg"></div>
-
-    <button class="analyze-btn" onclick="startAnalysis()">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-      Analyze Shooting Form
-    </button>
-  </div>
-
-  <div id="progressSection">
-    <div class="progress-wrap">
-      <div class="scanning-icon">
-        <svg class="pulse" width="40" height="40" viewBox="0 0 40 40" fill="none">
-          <circle cx="20" cy="20" r="18" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 4"/>
-          <circle cx="20" cy="20" r="10" stroke="var(--ink)" stroke-width="1.5"/>
-          <circle cx="20" cy="20" r="3" fill="var(--accent)"/>
-        </svg>
-      </div>
-      <div class="progress-title" id="progressTitle">Starting upload…</div>
-      <div class="progress-sub" id="progressSub">Uploading in chunks — no memory issues on iPhone</div>
-      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
-      <div class="progress-pct" id="progressPct" style="margin-top:7px">0%</div>
-    </div>
-  </div>
-
-  <div id="reportSection">
-    <div class="report-banner">
-      <div class="report-title-block">
-        <h2 id="reportName">Form Analysis</h2>
-        <p id="reportMeta">shooting form · ai breakdown</p>
-      </div>
-      <div class="score-cluster">
-        <div class="score-box"><div class="score-num" id="overallScore">—</div><div class="score-label">Overall</div></div>
-        <div class="score-divider"></div>
-        <div class="score-box"><div class="score-num" id="mechanicsScore">—</div><div class="score-label">Mechanics</div></div>
-        <div class="score-divider"></div>
-        <div class="score-box"><div class="score-num" id="consistencyScore">—</div><div class="score-label">Consistency</div></div>
-      </div>
-      <button class="reset-btn" onclick="resetApp()">← New</button>
-    </div>
-
-    <div class="scorecard" id="scorecard"></div>
-
-    <div class="section">
-      <div class="section-head"><div class="section-num">—</div><div class="section-label">Key Findings</div><div class="section-line"></div></div>
-      <div class="card" style="padding:1rem"><div class="findings-list" id="findingsList"></div></div>
-    </div>
-
-    <div class="section">
-      <div class="section-head"><div class="section-num">—</div><div class="section-label">Mechanics Breakdown</div><div class="section-line"></div></div>
-      <div class="card"><div class="report-text" id="mechanicsText"></div></div>
-    </div>
-
-    <div class="section">
-      <div class="section-head"><div class="section-num">—</div><div class="section-label">Drill Plan</div><div class="section-line"></div></div>
-      <div class="card" style="padding:1rem"><div class="drill-list" id="drillList"></div></div>
-    </div>
-
-    <div class="section">
-      <div class="section-head"><div class="section-num">—</div><div class="section-label">Priority Fix</div><div class="section-line"></div></div>
-      <div class="priority-card">
-        <div class="priority-label">// the one thing to fix this week</div>
-        <div class="priority-text" id="priorityText"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
 <script>
 let videoFile = null;
 const CHUNK_SIZE = 5 * 1024 * 1024;
@@ -306,22 +44,22 @@ async function initiateUpload(apiKey, file) {
       body: JSON.stringify({ file: { display_name: file.name } })
     }
   );
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error?.message || 'Failed to initiate upload (status ' + res.status + ')');
-  }
+
+  if (!res.ok) throw new Error('Failed to initiate upload');
   const uploadUrl = res.headers.get('X-Goog-Upload-URL');
-  if (!uploadUrl) throw new Error('No upload URL returned from Gemini');
+  if (!uploadUrl) throw new Error('No upload URL returned');
   return uploadUrl;
 }
 
 async function uploadChunked(uploadUrl, file, onProgress) {
   let offset = 0;
   let fileUri = null;
+
   while (offset < file.size) {
     const end = Math.min(offset + CHUNK_SIZE, file.size);
     const chunk = file.slice(offset, end);
     const isLast = end === file.size;
+
     const res = await fetch(uploadUrl, {
       method: 'POST',
       headers: {
@@ -331,182 +69,128 @@ async function uploadChunked(uploadUrl, file, onProgress) {
       },
       body: chunk
     });
+
     if (!res.ok && res.status !== 308) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error?.message || 'Upload failed at offset ' + offset);
+      throw new Error('Upload failed');
     }
+
     offset = end;
     onProgress(offset / file.size);
+
     if (isLast) {
       const data = await res.json();
       fileUri = data.file?.uri;
-      if (!fileUri) throw new Error('No file URI returned after upload');
     }
   }
+
   return fileUri;
 }
 
 async function waitForFile(apiKey, fileUri) {
   const fileName = fileUri.split('/').pop();
+
   for (let i = 0; i < 30; i++) {
-    await new Promise(r => setTimeout(r, 4000));
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/files/${fileName}?key=${apiKey}`);
+    await new Promise(r => setTimeout(r, 3000));
+
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/files/${fileName}?key=${apiKey}`
+    );
+
     if (!res.ok) continue;
+
     const data = await res.json();
+
     if (data.state === 'ACTIVE') return;
-    if (data.state === 'FAILED') throw new Error('File processing failed on Google\'s servers');
+    if (data.state === 'FAILED') throw new Error('File processing failed');
   }
-  throw new Error('File took too long to process — try a shorter clip');
+
+  throw new Error('File processing timeout');
 }
 
 async function startAnalysis() {
   document.getElementById('errorMsg').style.display = 'none';
-  const apiKey = document.getElementById('apiKey').value.trim();
-  const playerName = document.getElementById('playerName').value.trim();
-  const dominantHand = document.getElementById('dominantHand').value;
-  const level = document.getElementById('level').value;
-  const shotType = document.getElementById('shotType').value;
-  const cameraAngle = document.getElementById('cameraAngle').value;
-  const concerns = document.getElementById('concerns').value.trim();
 
-  if (!apiKey) { showError('Please enter your Gemini API key from aistudio.google.com'); return; }
-  if (!videoFile) { showError('Please select a shooting video'); return; }
+  const apiKey = document.getElementById('apiKey').value.trim();
+  if (!apiKey) return showError('Enter API key');
+  if (!videoFile) return showError('Select a video');
+
+  // size protection
+  if (videoFile.size > 100 * 1024 * 1024) {
+    return showError('Video too large — keep under ~100MB');
+  }
 
   document.getElementById('setupSection').style.display = 'none';
   document.getElementById('progressSection').style.display = 'block';
 
   try {
-    setProgress(2, 'Starting upload…', 'Connecting to Google File API');
+    setProgress(5, 'Uploading...');
     const uploadUrl = await initiateUpload(apiKey, videoFile);
-    setProgress(5, 'Uploading video…', 'Sending in chunks — no memory issues on iPhone');
 
-    const fileUri = await uploadChunked(uploadUrl, videoFile, (pct) => {
-      setProgress(5 + pct * 55, 'Uploading video…', Math.round(pct * 100) + '% · ' + (videoFile.size / 1024 / 1024).toFixed(0) + ' MB file');
+    const fileUri = await uploadChunked(uploadUrl, videoFile, (p) => {
+      setProgress(5 + p * 55);
     });
 
-    setProgress(62, 'Processing on Google servers…', 'Video is being prepared for Gemini');
+    setProgress(65, 'Processing...');
     await waitForFile(apiKey, fileUri);
-    setProgress(72, 'Gemini is analyzing your form…', 'Watching every shot in the video');
 
-    const playerDesc = [
-      playerName ? 'Player: ' + playerName : null,
-      dominantHand || null,
-      level ? level + ' level' : null,
-      shotType ? 'Shot type: ' + shotType : null,
-      cameraAngle ? 'Camera: ' + cameraAngle : null,
-      concerns ? 'Coach concerns: ' + concerns : null
-    ].filter(Boolean).join(' · ');
+    setProgress(75, 'Analyzing...');
 
-    const prompt = `You are an elite lacrosse shooting coach with expertise in biomechanics. Analyze every shot in this video. Player info: ${playerDesc || 'Not specified'}
-
-Watch the full kinetic chain: feet → hips → torso → shoulder → elbow → wrist → release.
-
-Respond ONLY with valid JSON, no markdown:
-{
-  "overall_score": "X/10",
-  "mechanics_score": "X/10",
-  "consistency_score": "X/10",
-  "scorecard": [
-    {"label": "Hip rotation", "score": "X/10", "level": "good|mid|low"},
-    {"label": "Top hand", "score": "X/10", "level": "good|mid|low"},
-    {"label": "Elbow drive", "score": "X/10", "level": "good|mid|low"},
-    {"label": "Follow-through", "score": "X/10", "level": "good|mid|low"},
-    {"label": "Foot plant", "score": "X/10", "level": "good|mid|low"},
-    {"label": "Release point", "score": "X/10", "level": "good|mid|low"}
-  ],
-  "findings": [
-    {"type": "strength", "text": "specific strength observed"},
-    {"type": "strength", "text": "another strength"},
-    {"type": "weakness", "text": "specific flaw with detail on what it looks like"},
-    {"type": "weakness", "text": "another flaw"},
-    {"type": "note", "text": "observation or context"}
-  ],
-  "mechanics_breakdown": "4 detailed paragraphs: (1) setup and wind-up, (2) hip and torso loading, (3) arm path and release, (4) follow-through and consistency across shots. Reference what you actually see. Use biomechanics terminology.",
-  "drills": [
-    {"name": "drill name", "target": "mechanic it fixes", "description": "2-3 sentences on how to run it and what to feel for."}
-  ],
-  "priority_focus": "2-3 sentences on the single highest-impact fix. Be direct about what the player should feel differently."
-}
-
-At least 4 drills and 5 findings. Be a demanding but constructive coach.`;
+    const prompt = `Analyze this lacrosse shooting video and return JSON only with scores, findings, and drills.`;
 
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-04-17:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }, { file_data: { mime_type: videoFile.type || 'video/mp4', file_uri: fileUri } }] }],
-          generationConfig: { temperature: 0.25, maxOutputTokens: 3000 }
+          contents: [
+            {
+              role: "user",
+              parts: [{ text: prompt }]
+            },
+            {
+              role: "user",
+              parts: [{
+                fileData: {
+                  mimeType: videoFile.type || 'video/mp4',
+                  fileUri: fileUri
+                }
+              }]
+            }
+          ],
+          generationConfig: {
+            temperature: 0.25,
+            maxOutputTokens: 3000
+          }
         })
       }
     );
 
-    setProgress(95, 'Building your report…', 'Almost done');
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error?.message || 'Gemini analysis failed');
-    }
+    if (!res.ok) throw new Error('Analysis failed');
 
     const data = await res.json();
-    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+    if (!data.candidates || !data.candidates.length) {
+      throw new Error("No response from Gemini");
+    }
+
+    const text = data.candidates[0].content.parts[0].text;
 
     let parsed;
     try {
-      parsed = JSON.parse(rawText.replace(/```json|```/g, '').trim());
-    } catch(e) {
-      parsed = { findings: [], drills: [], scorecard: [], mechanics_breakdown: rawText, priority_focus: '' };
+      parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
+    } catch {
+      parsed = { mechanics_breakdown: text };
     }
 
-    setProgress(100, 'Analysis complete!', '');
-    setTimeout(() => renderReport(parsed, playerName), 400);
+    setProgress(100, 'Done');
 
-  } catch(e) {
+    setTimeout(() => renderReport(parsed), 400);
+
+  } catch (e) {
     document.getElementById('progressSection').style.display = 'none';
     document.getElementById('setupSection').style.display = 'block';
     showError(e.message);
   }
 }
-
-function renderReport(data, playerName) {
-  document.getElementById('progressSection').style.display = 'none';
-  document.getElementById('reportName').textContent = playerName || 'Shooting Form';
-  document.getElementById('reportMeta').textContent = (document.getElementById('shotType').value || 'shooting form') + ' · ' + videoFile.name;
-  document.getElementById('overallScore').textContent = data.overall_score || '—';
-  document.getElementById('mechanicsScore').textContent = data.mechanics_score || '—';
-  document.getElementById('consistencyScore').textContent = data.consistency_score || '—';
-
-  document.getElementById('scorecard').innerHTML = (data.scorecard || []).map(s => {
-    const pct = parseInt(s.score) * 10;
-    const cls = s.level === 'good' ? 'score-good' : s.level === 'mid' ? 'score-mid' : 'score-low';
-    return `<div class="score-card"><div class="score-card-label">${s.label}</div><div class="score-card-val">${s.score}</div><div class="score-bar"><div class="score-bar-fill ${cls}" style="width:${pct}%"></div></div></div>`;
-  }).join('');
-
-  document.getElementById('findingsList').innerHTML = (data.findings || []).map(f =>
-    `<div class="finding ${f.type}"><div class="finding-type">${f.type === 'strength' ? '✓ Strength' : f.type === 'weakness' ? '✗ Fix' : '→ Note'}</div><div class="finding-text">${f.text}</div></div>`
-  ).join('');
-
-  document.getElementById('mechanicsText').textContent = data.mechanics_breakdown || '';
-
-  document.getElementById('drillList').innerHTML = (data.drills || []).map((d, i) =>
-    `<div class="drill-card"><div class="drill-num">0${i+1}</div><div class="drill-content"><div class="drill-name">${d.name}</div><div class="drill-desc">${d.description}</div>${d.target ? `<div class="drill-target">Fixes: ${d.target}</div>` : ''}</div></div>`
-  ).join('');
-
-  document.getElementById('priorityText').textContent = data.priority_focus || '';
-  document.getElementById('reportSection').style.display = 'block';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function resetApp() {
-  document.getElementById('reportSection').style.display = 'none';
-  document.getElementById('setupSection').style.display = 'block';
-  document.getElementById('fileChosen').style.display = 'none';
-  document.getElementById('errorMsg').style.display = 'none';
-  videoFile = null;
-  fileInput.value = '';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
 </script>
-</body>
-</html>
