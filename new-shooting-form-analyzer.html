@@ -30,19 +30,15 @@ function showError(msg) {
 }
 
 async function initiateUpload(apiKey, file) {
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/upload/v1beta/files?uploadType=resumable&key=${apiKey}`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Goog-Upload-Protocol': 'resumable',
-        'X-Goog-Upload-Command': 'start',
-        'X-Goog-Upload-Header-Content-Length': file.size,
-        'X-Goog-Upload-Header-Content-Type': file.type || 'video/mp4',
-      },
-      body: JSON.stringify({ file: { display_name: file.name } })
-    }
+  const formData = new FormData();
+formData.append("apiKey", apiKey);
+formData.append("video", videoFile);
+formData.append("prompt", prompt);
+
+const res = await fetch("/api/analyze", {
+  method: "POST",
+  body: formData
+});
   );
 
   if (!res.ok) throw new Error('Failed to initiate upload');
